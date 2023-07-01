@@ -13,8 +13,7 @@ This work is part of my Master thesis, aiming to:
 
 This repository contains the code produced as the result of the above.
 
-
-## What needs solving
+## What this aims to solve
 ### Method fragmentation
 While no longer in its infancy, the area of deep abstractions for SCRNs is still rather young. Over the past five years, researchers and developers focussed on utilising all sorts of neural network architectures and pipeline designs in their DA tools.
 
@@ -25,7 +24,7 @@ Each DA method would rely on one of the tools available in the relatively mature
 - __Selected SCRN definition formats__: [SBML](https://sbml.org) (.xml) & [Antimony](https://tellurium.readthedocs.io/en/latest/antimony.html) (human-readable)
 - __Selected stochastic simulation framework__: [Tellurium](https://tellurium.readthedocs.io/en/latest/)
 
-### User experience
+### Poor user experience
 Shared between all DA methods developed up to now is a lack of complexity abstraction. Namely, a user of these methods would need to posess the following:
 - a firm grasp of programming in Python
 - familiarity with command-line interfaces
