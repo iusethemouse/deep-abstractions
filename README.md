@@ -33,4 +33,16 @@ Shared between all DA methods developed up to now is a lack of complexity abstra
 
 >The "complexity abstraction" mentioned above can come in many ways, one of which is "wrapping" the implementation of the DA method in a graphical user interface. Combined with NAS, this would alleviate a large number of obstacles preventing researchers from using these tools.
 
-Selected GUI framework: [KNIME Analytics Platform](https://www.knime.com/knime-analytics-platform) via a [Python-based extension](https://docs.knime.com/latest/pure_python_node_extensions_guide/index.html#introduction)
+- Selected GUI framework: [KNIME Analytics Platform](https://www.knime.com/knime-analytics-platform) via a [Python-based extension](https://docs.knime.com/latest/pure_python_node_extensions_guide/index.html#introduction)
+
+---
+
+## What this aims to achieve
+As a concrete outcome of this work, an open-source KNIME extension will be available for researchers to use and contribute to. The planned v1.0.0 functionality:
+- Reading and writing SCRN models in SBML and Antimony formats.
+- Performing stochastic simulations of SCRN models using "classic" methods such as SSA, Tau-leaping, and others.
+- Using the generated trajectories as training data for a state-of-the-art neural network-based deep abstraction model.
+- Reading and writing trained deep abstraction models in common formats.
+- Performing stochastic simulations of SCRN models using deep abstractions models.
+
+Additionally, all the DA methods evaluated will be available in their modified state (e.g. common input data, etc.), allowing others to replicate the experiments or perform their own.
