@@ -1,0 +1,4 @@
+org.mcss_kn.deep_abstractions:
+  src: /Users/ivan/Developer/git/deep-abstractions/extension/src
+  conda_env_path: /Users/ivan/miniconda3/envs/dla-srn
+  debug_mode: true

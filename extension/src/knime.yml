@@ -1,0 +1,9 @@
+name: deep_abstractions
+author: Ivan Prigarin
+extension_module: src/source
+description: KNIME nodes for Deep Abstractions of Stochastic Chemical Reaction Networks.
+long_description: KNIME nodes for Deep Abstractions of Stochastic Chemical Reaction Networks.
+group_id: org.mcss_kn
+version: 0.0.1
+vendor: Ivan Prigarin, Konstanz, Germany
+license_file: LICENSE.TXT

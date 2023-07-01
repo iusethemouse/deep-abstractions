@@ -34,4 +34,4 @@ Shared between all DA methods developed up to now is a lack of complexity abstra
 
 >The "complexity abstraction" mentioned above can come in many ways, one of which is "wrapping" the implementation of the DA method in a graphical user interface. Combined with NAS, this would alleviate a large number of obstacles preventing researchers from using these tools.
 
-Selected GUI framework: [KNIME Analytics Platform](https://www.knime.com/knime-analytics-platform)
+Selected GUI framework: [KNIME Analytics Platform](https://www.knime.com/knime-analytics-platform) via a [Python-based extension](https://docs.knime.com/latest/pure_python_node_extensions_guide/index.html#introduction)
