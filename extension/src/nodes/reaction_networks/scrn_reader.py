@@ -8,6 +8,8 @@ from utils.port_objects import (
     ScrnDefinitionPortObject,
 )
 
+from utils.categories import reaction_networks_category
+
 DEFAULT_SBML_PATH = "/Users/ivan/Developer/git/deep-abstractions/scrn_models/sir.xml"
 
 
@@ -15,7 +17,7 @@ DEFAULT_SBML_PATH = "/Users/ivan/Developer/git/deep-abstractions/scrn_models/sir
     name="SCRN Reader",
     node_type=knext.NodeType.SOURCE,
     icon_path="src/assets/icons/icon.png",
-    category="/",
+    category=reaction_networks_category,
 )
 @knext.output_port(
     name="SCRN Definition",

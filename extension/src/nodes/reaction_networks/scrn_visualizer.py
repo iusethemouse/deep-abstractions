@@ -12,12 +12,14 @@ from utils.port_objects import (
     ScrnDefinitionPortObject,
 )
 
+from utils.categories import reaction_networks_category
+
 
 @knext.node(
     name="SCRN Visualizer",
     node_type=knext.NodeType.VISUALIZER,
     icon_path="src/assets/icons/icon.png",
-    category="/",
+    category=reaction_networks_category,
 )
 @knext.input_port(
     name="SCRN Definition",

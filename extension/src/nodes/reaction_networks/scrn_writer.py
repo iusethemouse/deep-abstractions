@@ -7,6 +7,8 @@ from utils.port_objects import (
     ScrnDefinitionPortObject,
 )
 
+from utils.categories import reaction_networks_category
+
 DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/my_srn.xml"
 
 
@@ -14,7 +16,7 @@ DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/my_srn.xml"
     name="SCRN Writer",
     node_type=knext.NodeType.SINK,
     icon_path="src/assets/icons/icon.png",
-    category="/",
+    category=reaction_networks_category,
 )
 @knext.input_port(
     name="SCRN Definition",
