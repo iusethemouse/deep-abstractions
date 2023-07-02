@@ -37,7 +37,7 @@ Shared between all DA methods developed up to now is a lack of complexity abstra
 
 ---
 
-## What this aims to achieve
+## Outcomes
 As a concrete outcome of this work, an open-source KNIME extension will be available for researchers to use and contribute to. The planned v1.0.0 functionality:
 - Reading and writing SCRN models in SBML and Antimony formats.
 - Performing stochastic simulations of SCRN models using "classic" methods such as SSA, Tau-leaping, and others.
