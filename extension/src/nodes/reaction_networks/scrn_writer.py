@@ -1,5 +1,6 @@
 import knime.extension as knext
 import tellurium as te
+from pathlib import Path
 
 from utils.port_objects import (
     scrn_definition_port_type,
@@ -9,7 +10,8 @@ from utils.port_objects import (
 
 from utils.categories import reaction_networks_category
 
-DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/my_srn.xml"
+DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/"
+DEFAULT_FILENAME = "scrn"
 
 
 @knext.node(
@@ -38,8 +40,12 @@ class ScrnWriter:
         enum=AvailableFormats,
     )
 
-    file_path = knext.StringParameter(
-        label="File path",
+    filename = knext.StringParameter(
+        label="Output filename", description="", default_value=DEFAULT_FILENAME
+    )
+
+    destination = knext.StringParameter(
+        label="Output directory",
         description="",
         default_value=DEFAULT_WRITE_PATH,
     )
@@ -55,11 +61,15 @@ class ScrnWriter:
         input_port_object: ScrnDefinitionPortObject,
     ):
         definition = input_port_object.data
+        extension = ".txt"
 
         if self.format_selection == self.AvailableFormats.SBML.name:
             definition = te.antimonyToSBML(definition)
+            extension = ".xml"
 
-        with open(self.file_path, "w") as f:
+        directory = Path(self.destination).joinpath(self.filename + extension)
+
+        with open(directory, "w") as f:
             f.write(definition)
 
         return
