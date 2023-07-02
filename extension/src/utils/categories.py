@@ -15,3 +15,11 @@ reaction_networks_category = knext.category(
     description="Nodes for handling SCRN definitions",
     icon="src/assets/icons/icon.png",
 )
+
+stochastic_simulations_category = knext.category(
+    path=main_category,
+    level_id="stochastic_simulations",
+    name="Stochastic Simulation",
+    description="Nodes for performing stochastic simulations of SCRNs",
+    icon="src/assets/icons/icon.png",
+)
