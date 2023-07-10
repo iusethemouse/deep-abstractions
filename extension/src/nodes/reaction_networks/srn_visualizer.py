@@ -7,36 +7,36 @@ import os
 import io
 
 from utils.port_objects import (
-    scrn_definition_port_type,
-    ScrnDefinitionSpec,
-    ScrnDefinitionPortObject,
+    srn_definition_port_type,
+    SrnDefinitionSpec,
+    SrnDefinitionPortObject,
 )
 
 from utils.categories import reaction_networks_category
 
 
 @knext.node(
-    name="SCRN Visualizer",
+    name="SRN Visualizer",
     node_type=knext.NodeType.VISUALIZER,
     icon_path="src/assets/icons/icon.png",
     category=reaction_networks_category,
 )
 @knext.input_port(
-    name="SCRN Definition",
+    name="SRN Definition",
     description="",
-    port_type=scrn_definition_port_type,
+    port_type=srn_definition_port_type,
 )
 @knext.output_view(name="Network diagram", description="")
-class ScrnVisualizer:
+class SrnVisualizer:
     def configure(
-        self, config_context: knext.ConfigurationContext, input_spec: ScrnDefinitionSpec
+        self, config_context: knext.ConfigurationContext, input_spec: SrnDefinitionSpec
     ):
         return
 
     def execute(
         self,
         exec_context: knext.ExecutionContext,
-        input_port_object: ScrnDefinitionPortObject,
+        input_port_object: SrnDefinitionPortObject,
     ):
         definition = input_port_object.data
 

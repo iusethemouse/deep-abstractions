@@ -194,9 +194,12 @@ class WorkflowManager:
     def produce_chain_of_states(
         self, n_steps=10, random_index=None, initial_state=None
     ):
-        if random_index == None and initial_state == None:
+        if random_index == None:
             random_index = self.get_random_index_for_initial_condition()
+
+        if initial_state == None:
             initial_state = self.get_random_initial_state(random_index)
+
         current_state = initial_state
         trajectories = [current_state]
         timestamp = 0.1

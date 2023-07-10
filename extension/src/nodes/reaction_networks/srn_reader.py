@@ -3,28 +3,28 @@ import tellurium as te
 from pathlib import Path
 
 from utils.port_objects import (
-    scrn_definition_port_type,
-    ScrnDefinitionSpec,
-    ScrnDefinitionPortObject,
+    srn_definition_port_type,
+    SrnDefinitionSpec,
+    SrnDefinitionPortObject,
 )
 
 from utils.categories import reaction_networks_category
 
-DEFAULT_SBML_PATH = "/Users/ivan/Developer/git/deep-abstractions/scrn_models/sir.xml"
+DEFAULT_SBML_PATH = "/Users/ivan/Developer/git/deep-abstractions/srn_models/sir.xml"
 
 
 @knext.node(
-    name="SCRN Reader",
+    name="SRN Reader",
     node_type=knext.NodeType.SOURCE,
     icon_path="src/assets/icons/icon.png",
     category=reaction_networks_category,
 )
 @knext.output_port(
-    name="SCRN Definition",
+    name="SRN Definition",
     description="",
-    port_type=scrn_definition_port_type,
+    port_type=srn_definition_port_type,
 )
-class ScrnReader:
+class SrnReader:
     file_path = knext.StringParameter(
         label="File path",
         description="",
@@ -62,10 +62,10 @@ class ScrnReader:
         definition = self._load_definition()
         spec_data = self._get_spec_data(definition)
 
-        return ScrnDefinitionSpec(spec_data)
+        return SrnDefinitionSpec(spec_data)
 
     def execute(self, exec_context: knext.ExecutionContext):
         definition = self._load_definition()
         spec_data = self._get_spec_data(definition)
 
-        return ScrnDefinitionPortObject(ScrnDefinitionSpec(spec_data), definition)
+        return SrnDefinitionPortObject(SrnDefinitionSpec(spec_data), definition)

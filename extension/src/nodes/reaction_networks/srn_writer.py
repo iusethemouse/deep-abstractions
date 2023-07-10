@@ -3,29 +3,29 @@ import tellurium as te
 from pathlib import Path
 
 from utils.port_objects import (
-    scrn_definition_port_type,
-    ScrnDefinitionSpec,
-    ScrnDefinitionPortObject,
+    srn_definition_port_type,
+    SrnDefinitionSpec,
+    SrnDefinitionPortObject,
 )
 
 from utils.categories import reaction_networks_category
 
 DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/"
-DEFAULT_FILENAME = "scrn"
+DEFAULT_FILENAME = "srn"
 
 
 @knext.node(
-    name="SCRN Writer",
+    name="SRN Writer",
     node_type=knext.NodeType.SINK,
     icon_path="src/assets/icons/icon.png",
     category=reaction_networks_category,
 )
 @knext.input_port(
-    name="SCRN Definition",
+    name="SRN Definition",
     description="",
-    port_type=scrn_definition_port_type,
+    port_type=srn_definition_port_type,
 )
-class ScrnWriter:
+class SrnWriter:
     class AvailableFormats(knext.EnumParameterOptions):
         SBML = ("SBML", "Write to an `.xml` file in the SBML format (standard).")
         ANTIMONY = (
@@ -51,14 +51,14 @@ class ScrnWriter:
     )
 
     def configure(
-        self, config_context: knext.ConfigurationContext, input_spec: ScrnDefinitionSpec
+        self, config_context: knext.ConfigurationContext, input_spec: SrnDefinitionSpec
     ):
         return
 
     def execute(
         self,
         exec_context: knext.ExecutionContext,
-        input_port_object: ScrnDefinitionPortObject,
+        input_port_object: SrnDefinitionPortObject,
     ):
         definition = input_port_object.data
         extension = ".txt"

@@ -30,6 +30,14 @@ wf_manager.prepare_data_loaders(batch_size=64)
 # wf_manager.validate_deep_abstraction()
 wf_manager.load_deep_abstraction()
 
+# da simulation
+init_state = wf_manager.get_random_initial_state()
+print(f">> type of input state: {type(init_state)}")
+print(f">> shape of input state: {init_state.shape}")
+pred_state = wf_manager.predict_next_state(init_state)
+print(f">> type of pred state: {type(pred_state)}")
+print(f">> shape of pred state: {pred_state.shape}")
+
 # comparison of Tellurium and Deep Abstraction
 ## speed of simulation
 # n_init_conditions = [1, 10, 100, 200, 500, 1000, 1500]
@@ -158,38 +166,38 @@ wf_manager.load_deep_abstraction()
 # with open("accuracy_results.pkl", "wb") as file:
 #     pickle.dump(results, file)
 
-with open("accuracy_results.pkl", "rb") as file:
-    results = pickle.load(file)
+# with open("accuracy_results.pkl", "rb") as file:
+#     results = pickle.load(file)
 
 
-def rmse(actual, pred):
-    actual, pred = np.array(actual), np.array(pred)
-    return np.sqrt(np.square(np.subtract(actual, pred)).mean())
+# def rmse(actual, pred):
+#     actual, pred = np.array(actual), np.array(pred)
+#     return np.sqrt(np.square(np.subtract(actual, pred)).mean())
 
 
-def calculate_errors(nested_dict):
-    error_dict = {}
-    for condition, data in nested_dict.items():
-        error_dict[condition] = {}
-        for key in data:
-            error_dict[condition][key] = rmse(data[key]["da"], data[key]["te"])
-    return error_dict
+# def calculate_errors(nested_dict):
+#     error_dict = {}
+#     for condition, data in nested_dict.items():
+#         error_dict[condition] = {}
+#         for key in data:
+#             error_dict[condition][key] = rmse(data[key]["da"], data[key]["te"])
+#     return error_dict
 
 
-def average_error(error_dict):
-    total_error = 0
-    count = 0
-    for condition, errors in error_dict.items():
-        for error in errors.values():
-            total_error += error
-            count += 1
-    return total_error / count
+# def average_error(error_dict):
+#     total_error = 0
+#     count = 0
+#     for condition, errors in error_dict.items():
+#         for error in errors.values():
+#             total_error += error
+#             count += 1
+#     return total_error / count
 
 
-err = calculate_errors(results)
-avg_err = average_error(err)
+# err = calculate_errors(results)
+# avg_err = average_error(err)
 
-pprint(avg_err)
+# pprint(avg_err)
 
 
 # for i in n_init_conditions:
