@@ -13,13 +13,7 @@ from utils.port_objects import (
     SrnDefinitionPortObject,
 )
 
-from utils.port_objects import (
-    simulation_data_port_type,
-    SimulationDataSpec,
-    SimulationDataPortObject,
-)
-
-from utils.categories import stochastic_simulations_category
+from utils.categories import simulations_category
 
 te.setDefaultPlottingEngine("matplotlib")
 
@@ -30,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
     name="Stochastic Simulator",
     node_type=knext.NodeType.MANIPULATOR,
     icon_path="src/assets/icons/icon.png",
-    category=stochastic_simulations_category,
+    category=simulations_category,
 )
 @knext.input_port(
     name="SRN Definition",

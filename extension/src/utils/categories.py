@@ -1,7 +1,7 @@
 import knime.extension as knext
 
 main_category = knext.category(
-    path="/community",
+    path="/",
     level_id="deep_abstractions",
     name="Deep Abstractions of SRNs",
     description="Nodes for Deep Learning Abstractions of Stochastic Biochemical Systems",
@@ -16,10 +16,18 @@ reaction_networks_category = knext.category(
     icon="src/assets/icons/icon.png",
 )
 
-stochastic_simulations_category = knext.category(
+simulations_category = knext.category(
     path=main_category,
-    level_id="stochastic_simulations",
-    name="Stochastic Simulation",
+    level_id="simulations",
+    name="Simulation",
     description="Nodes for performing stochastic simulations of SRNs",
+    icon="src/assets/icons/icon.png",
+)
+
+deep_abstractions_category = knext.category(
+    path=main_category,
+    level_id="deep_abstractions",
+    name="Deep Abstraction",
+    description="Nodes for handling deep abstractions of SRNs",
     icon="src/assets/icons/icon.png",
 )

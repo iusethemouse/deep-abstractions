@@ -30,13 +30,6 @@ wf_manager.prepare_data_loaders(batch_size=64)
 # wf_manager.validate_deep_abstraction()
 wf_manager.load_deep_abstraction()
 
-# da simulation
-init_state = wf_manager.get_random_initial_state()
-print(f">> type of input state: {type(init_state)}")
-print(f">> shape of input state: {init_state.shape}")
-pred_state = wf_manager.predict_next_state(init_state)
-print(f">> type of pred state: {type(pred_state)}")
-print(f">> shape of pred state: {pred_state.shape}")
 
 # comparison of Tellurium and Deep Abstraction
 ## speed of simulation
