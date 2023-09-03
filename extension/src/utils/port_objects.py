@@ -1,15 +1,15 @@
 """
 Contains definitions of custom node port objects:
-- SRN definition
-- Simulation data
+- CRN definition
+- Training simulation data
 - Deep Abstraction model
 """
 import knime.extension as knext
 import pickle
 
 
-########## SRN DEFINITION ##########
-class SrnDefinitionSpec(knext.PortObjectSpec):
+########## CRN DEFINITION ##########
+class CrnDefinitionSpec(knext.PortObjectSpec):
     def __init__(self, spec_data: str) -> None:
         self._spec_data = spec_data
 
@@ -17,7 +17,7 @@ class SrnDefinitionSpec(knext.PortObjectSpec):
         return {"spec_data": self._spec_data}
 
     @classmethod
-    def deserialize(cls, data: dict) -> "SrnDefinitionSpec":
+    def deserialize(cls, data: dict) -> "CrnDefinitionSpec":
         return cls(data["spec_data"])
 
     @property
@@ -25,8 +25,8 @@ class SrnDefinitionSpec(knext.PortObjectSpec):
         return self._spec_data
 
 
-class SrnDefinitionPortObject(knext.PortObject):
-    def __init__(self, spec: SrnDefinitionSpec, data) -> None:
+class CrnDefinitionPortObject(knext.PortObject):
+    def __init__(self, spec: CrnDefinitionSpec, data) -> None:
         super().__init__(spec)
         self._data = data
         self._spec = spec
@@ -36,8 +36,8 @@ class SrnDefinitionPortObject(knext.PortObject):
 
     @classmethod
     def deserialize(
-        cls, spec: SrnDefinitionSpec, data: bytes
-    ) -> "SrnDefinitionPortObject":
+        cls, spec: CrnDefinitionSpec, data: bytes
+    ) -> "CrnDefinitionPortObject":
         return cls(spec, pickle.loads(data))
 
     @property
@@ -49,10 +49,10 @@ class SrnDefinitionPortObject(knext.PortObject):
         return self._spec
 
 
-srn_definition_port_type = knext.port_type(
-    name="SRN Definition",
-    object_class=SrnDefinitionPortObject,
-    spec_class=SrnDefinitionSpec,
+crn_definition_port_type = knext.port_type(
+    name="CRN Definition",
+    object_class=CrnDefinitionPortObject,
+    spec_class=CrnDefinitionSpec,
 )
 
 

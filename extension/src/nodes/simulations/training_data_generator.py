@@ -2,11 +2,12 @@ import knime.extension as knext
 
 import tellurium as te
 import logging
+import pandas as pd
 
 from utils.port_objects import (
-    srn_definition_port_type,
-    SrnDefinitionSpec,
-    SrnDefinitionPortObject,
+    crn_definition_port_type,
+    CrnDefinitionSpec,
+    CrnDefinitionPortObject,
 )
 
 from utils.port_objects import (
@@ -30,7 +31,7 @@ LOGGER = logging.getLogger(__name__)
 @knext.input_port(
     name="SRN Definition",
     description="",
-    port_type=srn_definition_port_type,
+    port_type=crn_definition_port_type,
 )
 @knext.output_port(
     name="Training simulation data", description="", port_type=simulation_data_port_type
@@ -59,14 +60,14 @@ class TrainingDataGenerator:
     )
 
     def configure(
-        self, config_context: knext.ConfigurationContext, input_spec: SrnDefinitionSpec
+        self, config_context: knext.ConfigurationContext, input_spec: CrnDefinitionSpec
     ):
         return SimulationDataSpec(dict())
 
     def execute(
         self,
         exec_context: knext.ExecutionContext,
-        input_port_object: SrnDefinitionPortObject,
+        input_port_object: CrnDefinitionPortObject,
     ):
         definition = input_port_object.data
 

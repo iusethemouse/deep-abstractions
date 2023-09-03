@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 import logging
 
 from utils.port_objects import (
-    srn_definition_port_type,
-    SrnDefinitionSpec,
-    SrnDefinitionPortObject,
+    crn_definition_port_type,
+    CrnDefinitionSpec,
+    CrnDefinitionPortObject,
 )
 
 from utils.categories import simulations_category
@@ -29,7 +29,7 @@ LOGGER = logging.getLogger(__name__)
 @knext.input_port(
     name="SRN Definition",
     description="",
-    port_type=srn_definition_port_type,
+    port_type=crn_definition_port_type,
 )
 @knext.output_table(
     name="Simulation traces",
@@ -62,7 +62,7 @@ class StochasticSimulator:
     )
 
     def configure(
-        self, config_context: knext.ConfigurationContext, input_spec: SrnDefinitionSpec
+        self, config_context: knext.ConfigurationContext, input_spec: CrnDefinitionSpec
     ):
         species_names = input_spec.spec_data["species"]  # model definition
         col_names = ["time"] + species_names
@@ -75,10 +75,11 @@ class StochasticSimulator:
     def execute(
         self,
         exec_context: knext.ExecutionContext,
-        input_port_object: SrnDefinitionPortObject,
+        input_port_object: CrnDefinitionPortObject,
     ):
         definition = input_port_object.data
         r = te.loadAntimonyModel(definition)
+        # r = definition
         col_names = ["time"] + r.getBoundarySpeciesIds() + r.getFloatingSpeciesIds()
 
         r.integrator = "gillespie"
@@ -86,7 +87,8 @@ class StochasticSimulator:
             r.integrator.seed = self.random_seed
 
         selections = ["time"] + r.getBoundarySpeciesIds() + r.getFloatingSpeciesIds()
-        n_cols = len(r.selections)
+        # n_cols = len(r.selections)
+        n_cols = len(col_names)
         s_sum = np.zeros(shape=[self.n_steps, n_cols])
         stacked_sum = np.zeros(shape=[self.n_simulations, self.n_steps, n_cols])
 
@@ -99,6 +101,7 @@ class StochasticSimulator:
             s = r.simulate(
                 self.start_time, self.end_time, self.n_steps, selections=selections
             )
+            s_arr = np.array(s)
             s_sum += s
             stacked_sum[k] = s
             progress += progress_step

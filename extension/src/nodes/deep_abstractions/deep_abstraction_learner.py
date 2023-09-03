@@ -31,22 +31,39 @@ LOGGER = logging.getLogger(__name__)
 )
 @knext.input_port(
     name="Training data",
-    description="",
+    description="CRN simulation data generated using SSA and used for training.",
     port_type=simulation_data_port_type,
 )
 @knext.output_port(
     name="Trained Deep Abstraction Model",
-    description="",
+    description="The trained deep abstraction model.",
     port_type=deep_abstraction_model_port_type,
 )
 class DeepAbstractionLearner:
+    """
+    Learns a deep abstraction model from CRN simulation data.
+
+    A trained deep abstraction model can be used to efficiently produce CRN trajectories.
+    """
+
     n_epochs = knext.IntParameter(
-        label="Number of epochs", description="", default_value=20, min_value=1
+        label="Number of epochs",
+        description="""
+        The number of epochs to train the deep abstraction model for.
+        
+        An epoch is a single pass through the entire training set.
+        Usually, performance increases with the number of epochs, but then
+        decreases as the model begins to overfit the training data.""",
+        default_value=20,
+        min_value=1,
     )
 
     patience = knext.IntParameter(
         label="Training patience",
-        description="",
+        description="""
+        The number of epochs to wait before early stopping.
+        
+        Early stopping is a form of regularization used to avoid overfitting.""",
         default_value=8,
         min_value=1,
         is_advanced=True,
@@ -54,7 +71,10 @@ class DeepAbstractionLearner:
 
     batch_size = knext.IntParameter(
         label="Batch size",
-        description="",
+        description="""
+        The number of training examples in one forward/backward pass.
+        
+        The higher the batch size, the more available memory is required.""",
         default_value=64,
         min_value=1,
         is_advanced=True,
@@ -70,13 +90,13 @@ class DeepAbstractionLearner:
         exec_context: knext.ExecutionContext,
         input_port_object: SimulationDataPortObject,
     ):
-        srn_definition = input_port_object.data["srn_definition"]
+        crn_definition = input_port_object.data["crn_definition"]
         training_data = input_port_object.data["training_data"]
         sim_configuration = input_port_object.data["simulation_configuration"]
 
         wf_manager = WorkflowManager()
         wf_manager.init_data_manager(
-            scrn_definition=srn_definition,
+            scrn_definition=crn_definition,
             n_initial_conditions=sim_configuration["n_init_conditions"],
             n_simulations_per_condition=sim_configuration["n_sims_per_init_conditions"],
             steps=sim_configuration["n_steps"],
@@ -93,7 +113,7 @@ class DeepAbstractionLearner:
 
         data = {
             "model_weights": wf_manager.export_deep_abstraction_weights(),
-            "srn_definition": srn_definition,
+            "crn_definition": crn_definition,
             "simulation_configuration": sim_configuration,
         }
 

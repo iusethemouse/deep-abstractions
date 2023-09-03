@@ -54,8 +54,8 @@ class WorkflowManager:
         train_data = self.simulation_data[:split_index]
         test_data = self.simulation_data[split_index:]
 
-        train_dataset = DataWrapper(train_data)
-        test_dataset = DataWrapper(test_data)
+        train_dataset = DataWrapper(train_data, len(self.data_manager.get_species_names()))
+        test_dataset = DataWrapper(test_data, len(self.data_manager.get_species_names()))
 
         self.train_loader = DataLoader(
             train_dataset, batch_size=batch_size, shuffle=True

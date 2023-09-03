@@ -10,15 +10,17 @@ class DataWrapper(Dataset):
     Used for wrapping raw NumPy data. Training and testing sets should be wrapped separately.
     """
 
-    def __init__(self, data):
+    def __init__(self, data, n_species):
         self.data = data
+        self.n_species = n_species
 
     def __getitem__(self, index):
         """
         Inputs contain all information: time, species concentrations, reaction rates.
         Targets only contain species concentrations.
         """
-        species_concentration_indices = [1, 2, 3]
+        # species_concentration_indices = [1, 2, 3]
+        species_concentration_indices = list(range(1, self.n_species + 1))
 
         inputs = self.data[index, :-1, :].astype(np.float32)
         targets = self.data[index, 1:, species_concentration_indices].astype(np.float32)
