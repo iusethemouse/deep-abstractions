@@ -1,30 +1,40 @@
 import tellurium as te
 import numpy as np
 import os
+import io
+import random
 import matplotlib.pyplot as plt
 
 
 class SimulationManager:
-    def __init__(
-        self,
-        path_to_sbml,
-        model_name,
-        n_init_conditions,
-        n_sims_per_init_condition,
-        end_time,
-        n_steps,
-    ):
+    def __init__(self, path_to_sbml):
         try:
             self.model = te.loada(te.loadSBMLModel(path_to_sbml).getAntimony())
         except Exception:
             self.model = te.loada(path_to_sbml)
+
         self.model.integrator = "gillespie"
 
-        self.model_name = model_name
+    def load_model(self, model):
+        self.model = model
+
+    def set_model_parameters(
+        self,
+        n_init_conditions,
+        n_sims_per_init_condition,
+        start_time,
+        end_time,
+        n_steps,
+        random_seed=0,
+    ):
         self.n_init_conditions = n_init_conditions
         self.n_sims_per_init_condition = n_sims_per_init_condition
+        self.start_time = start_time
         self.end_time = end_time
         self.n_steps = n_steps
+
+        if random_seed != 0:
+            self.model.integrator.seed = random_seed
 
     def get_species_names(self):
         return self.model.getFloatingSpeciesConcentrationIds()
@@ -136,17 +146,72 @@ class SimulationManager:
 
         return randomized_parameters
 
-    def simulate(self, randomized_init_conditions, randomized_reaction_rates=None):
+    def simulate_and_plot(self, exec_context):
+        """
+        Used to enable rapid exploration of the CRN. Generates trajectories for a single initial condition,
+        and provides a plot of the mean trajectories.
+        """
+        col_names = ["time"] + self.get_species_names()
+        selections = [
+            "time"
+        ] + self.get_species_names()  # currently same as col_names, but should allow selecting specific species
+
+        n_cols = len(col_names)
+        s_sum = np.zeros(shape=[self.n_steps, n_cols])
+        stacked_sum = np.zeros(
+            shape=[self.n_sims_per_init_condition, self.n_steps, n_cols]
+        )
+
+        progress = 0
+        progress_step = 100 / self.n_sims_per_init_condition / 100
+
+        for i in range(self.n_sims_per_init_condition):
+            exec_context.set_progress(progress)
+            self.model.reset()
+            s = self.model.simulate(
+                self.start_time, self.end_time, self.n_steps, selections=selections
+            )
+            s_sum += s
+            stacked_sum[i] = s
+            progress += progress_step
+            self.model.plot(s, alpha=0.5, show=False)
+
+        te.plot(
+            s[:, 0],
+            s_sum[:, 1:] / self.n_sims_per_init_condition,
+            names=[x + " (mean)" for x in selections[1:]],
+            title="Stochastic simulation",
+            xtitle="time",
+            ytitle="concentration",
+        )
+        te.show()
+
+        fig = plt.gcf()
+        png_bytes = io.BytesIO()
+        fig.savefig(png_bytes, format="png")
+
+        return stacked_sum, png_bytes
+
+    def simulate(
+        self, randomized_init_conditions, exec_context, randomized_reaction_rates=None
+    ):
         """
         Returns: a numpy array of generated trajectories of shape
         (n_init_conditions * n_sims_per_init_condition, n_steps, n_variables)
         """
         results = []
 
+        progress = 0
+        progress_step = 100 / self.n_init_conditions / 100
+
         for i in range(self.n_init_conditions):
+            if exec_context.is_canceled():
+                print("Execution cancelled.")
+                break
             print(
-                f">> Performing stochastic simulation for initial condition {i + 1} / {self.n_init_conditions}."
+                f"Performing stochastic simulation for initial condition {i + 1} / {self.n_init_conditions}."
             )
+            exec_context.set_progress(progress)
             for j in range(self.n_sims_per_init_condition):
                 self.model.reset()
 
@@ -169,43 +234,42 @@ class SimulationManager:
 
                 results.append(trajectory)
 
+            progress += progress_step
+
         return np.concatenate([np.expand_dims(a, axis=0) for a in results], axis=0)
 
     def plot_simulations(
         self,
-        folder_name,
+        # folder_name,
         data,
         n_init_conditions,
         n_sims_per_init_condition,
         column_names,
     ):
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
+        i = random.randint(0, n_init_conditions - 1)
 
-        for i in range(n_init_conditions):
-            sims = data[
-                i * n_sims_per_init_condition : (i + 1) * n_sims_per_init_condition,
-                :,
-                :,
-            ]
+        sims = data[
+            i * n_sims_per_init_condition : (i + 1) * n_sims_per_init_condition,
+            :,
+            :,
+        ]
 
-            means = np.mean(sims, axis=0)
-            stds = np.std(sims, axis=0)
-            plt.figure()
+        means = np.mean(sims, axis=0)
+        stds = np.std(sims, axis=0)
+        plt.figure()
 
-            # plot the mean and standard deviation for each species
-            for j in range(1, sims.shape[2]):
-                plt.plot(means[:, 0], means[:, j], label=column_names[j])
-                plt.fill_between(
-                    means[:, 0],
-                    means[:, j] - stds[:, j],
-                    means[:, j] + stds[:, j],
-                    alpha=0.2,
-                )
+        # plot the mean and standard deviation for each species
+        for j in range(1, sims.shape[2]):
+            plt.plot(means[:, 0], means[:, j], label=column_names[j])
+            plt.fill_between(
+                means[:, 0],
+                means[:, j] - stds[:, j],
+                means[:, j] + stds[:, j],
+                alpha=0.2,
+            )
 
-            plt.legend()
-            plt.savefig(f"{folder_name}/plot_{i}.png")
-            plt.close()
+        plt.legend()
+        plt.show()
 
     def truncate_columns(self, data, n_cols):
         return data[..., :-n_cols]

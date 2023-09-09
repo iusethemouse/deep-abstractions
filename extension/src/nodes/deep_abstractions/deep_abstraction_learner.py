@@ -16,7 +16,8 @@ from utils.port_objects import (
 )
 
 from utils.categories import deep_abstractions_category
-from utils.workflow_manager import WorkflowManager
+from utils.simulation_manager import SimulationManager
+from utils.mdn_manager import MdnManager
 
 te.setDefaultPlottingEngine("matplotlib")
 
@@ -35,24 +36,25 @@ LOGGER = logging.getLogger(__name__)
     port_type=simulation_data_port_type,
 )
 @knext.output_port(
-    name="Trained Deep Abstraction Model",
-    description="The trained deep abstraction model.",
+    name="Trained Deep Abstract Model",
+    description="The trained deep abstract model.",
     port_type=deep_abstraction_model_port_type,
 )
 class DeepAbstractionLearner:
     """
-    Learns a deep abstraction model from CRN simulation data.
+    Learns a deep abstract model from CRN simulation data.
 
-    A trained deep abstraction model can be used to efficiently produce CRN trajectories.
+    A well-trained deep abstract model can be used to efficiently produce new CRN trajectories that follow the CRN dynamics
+    encoded in the training data.
     """
 
     n_epochs = knext.IntParameter(
         label="Number of epochs",
         description="""
-        The number of epochs to train the deep abstraction model for.
+        The number of epochs to train the deep abstract model for.
         
         An epoch is a single pass through the entire training set.
-        Usually, performance increases with the number of epochs, but then
+        Usually, the model's performance increases with the number of epochs, but then
         decreases as the model begins to overfit the training data.""",
         default_value=20,
         min_value=1,
@@ -63,7 +65,7 @@ class DeepAbstractionLearner:
         description="""
         The number of epochs to wait before early stopping.
         
-        Early stopping is a form of regularization used to avoid overfitting.""",
+        Early stopping is a form of regularisation used to avoid overfitting.""",
         default_value=8,
         min_value=1,
         is_advanced=True,
@@ -75,7 +77,7 @@ class DeepAbstractionLearner:
         The number of training examples in one forward/backward pass.
         
         The higher the batch size, the more available memory is required.""",
-        default_value=64,
+        default_value=128,
         min_value=1,
         is_advanced=True,
     )
@@ -90,31 +92,36 @@ class DeepAbstractionLearner:
         exec_context: knext.ExecutionContext,
         input_port_object: SimulationDataPortObject,
     ):
-        crn_definition = input_port_object.data["crn_definition"]
-        training_data = input_port_object.data["training_data"]
-        sim_configuration = input_port_object.data["simulation_configuration"]
+        training_data = input_port_object.data
+        ant_definition = input_port_object.spec.spec_data["antimony_definition"]
+        sm = SimulationManager(ant_definition)
 
-        wf_manager = WorkflowManager()
-        wf_manager.init_data_manager(
-            scrn_definition=crn_definition,
-            n_initial_conditions=sim_configuration["n_init_conditions"],
-            n_simulations_per_condition=sim_configuration["n_sims_per_init_conditions"],
-            steps=sim_configuration["n_steps"],
-            endtime=sim_configuration["endtime"],
-        )
-        wf_manager.init_deep_abstraction()
-        wf_manager.load_simulation_data_from_memory(training_data)
-        wf_manager.prepare_data_loaders(batch_size=self.batch_size)
+        sim_config = input_port_object.spec.spec_data["simulation_configuration"]
+        n_init_conditions = sim_config["n_init_conditions"]
+        n_sims_per_init_condition = sim_config["n_sims_per_init_condition"]
+        start_time = sim_config["start_time"]
+        end_time = sim_config["end_time"]
+        n_steps = sim_config["n_steps"]
 
-        wf_manager.train_deep_abstraction(
-            exec_context, n_epochs=self.n_epochs, patience=self.patience
+        sm.set_model_parameters(
+            n_init_conditions,
+            n_sims_per_init_condition,
+            start_time,
+            end_time,
+            n_steps,
         )
-        wf_manager.validate_deep_abstraction()
+
+        mm = MdnManager(sm.get_num_species())
+        mm.load_data(training_data)
+        mm.prepare_data_loaders(batch_size=self.batch_size)
+        mm.train(
+            exec_context=exec_context, n_epochs=self.n_epochs, patience=self.patience
+        )
 
         data = {
-            "model_weights": wf_manager.export_deep_abstraction_weights(),
-            "crn_definition": crn_definition,
-            "simulation_configuration": sim_configuration,
+            "model_weights": mm.get_model_weights(),
         }
 
-        return DeepAbstractionModelPortObject(DeepAbstractionModelSpec(dict()), data)
+        return DeepAbstractionModelPortObject(
+            DeepAbstractionModelSpec(input_port_object.spec.spec_data), data
+        )

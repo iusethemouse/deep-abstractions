@@ -1,8 +1,6 @@
 import knime.extension as knext
 
-import tellurium as te
 import logging
-import pandas as pd
 
 from utils.port_objects import (
     crn_definition_port_type,
@@ -17,9 +15,10 @@ from utils.port_objects import (
 )
 
 from utils.categories import simulations_category
-from utils.workflow_manager import WorkflowManager
+from utils.simulation_manager import SimulationManager
 
 LOGGER = logging.getLogger(__name__)
+ZERO_PERTURB_RANGE = (0, 10)
 
 
 @knext.node(
@@ -29,34 +28,72 @@ LOGGER = logging.getLogger(__name__)
     category=simulations_category,
 )
 @knext.input_port(
-    name="SRN Definition",
-    description="",
+    name="CRN Definition",
+    description="The CRN model to produce the training data for.",
     port_type=crn_definition_port_type,
 )
 @knext.output_port(
-    name="Training simulation data", description="", port_type=simulation_data_port_type
+    name="Training simulation data",
+    description="Object containing the generated training data.",
+    port_type=simulation_data_port_type,
 )
 class TrainingDataGenerator:
+    """
+    This node allows to generate training data for the provided CRN model. The process differs
+    from the Stochastic Simulator node in that the initial conditions are randomly varied to cover a predefined
+    range. The generated training data has a shape of (n_init_conditions * n_sims_per_init_conditions, n_steps, n_species + 1).
+
+    The training data can then be used to train a deep abstract model.
+    """
+
+    start_time = knext.DoubleParameter(
+        label="Start time",
+        description="Time from which to start the simulation.",
+        default_value=0.0,
+    )
+
     end_time = knext.DoubleParameter(
-        label="End time", description="", default_value=50.0, min_value=0.1
+        label="End time",
+        description="Time at which to stop the simulation.",
+        default_value=50.0,
+        min_value=0.1,
     )
 
     n_steps = knext.IntParameter(
-        label="Steps per simulation", description="", default_value=100, min_value=1
+        label="Steps",
+        description="Number of steps to perform during the specified span of time.",
+        default_value=50,
+        min_value=1,
     )
 
     n_init_conditions = knext.IntParameter(
         label="Number of initial conditions",
-        description="",
+        description="The initial conditions encoded in the CRN definition will be randomly varied to produce this many initial conditions.",
         default_value=100,
         min_value=1,
     )
 
-    n_sims_per_init_conditions = knext.IntParameter(
+    n_sims_per_init_condition = knext.IntParameter(
         label="Simulations per initial condition",
-        description="",
+        description="Number of simulations to perform per initial condition.",
         default_value=10,
         min_value=1,
+    )
+
+    variance_range = knext.DoubleParameter(
+        label="Variance degree",
+        description="The degree of the random perturbation to apply to the initial conditions.",
+        default_value=0.1,
+        min_value=0.0,
+        max_value=1.0,
+    )
+
+    zero_perturb_prob = knext.DoubleParameter(
+        label="Zero perturbation probability",
+        description="Probability of replacing a species with a zero initial concentration with a random value.",
+        default_value=0.9,
+        min_value=0.0,
+        max_value=1.0,
     )
 
     def configure(
@@ -69,31 +106,34 @@ class TrainingDataGenerator:
         exec_context: knext.ExecutionContext,
         input_port_object: CrnDefinitionPortObject,
     ):
-        definition = input_port_object.data
-
-        # initialise all components
-        wf_manager = WorkflowManager()
-        wf_manager.init_data_manager(
-            scrn_definition=definition,
-            n_initial_conditions=self.n_init_conditions,
-            n_simulations_per_condition=self.n_sims_per_init_conditions,
-            steps=self.n_steps,
-            endtime=self.end_time,
+        ant_definition = input_port_object.data
+        sm = SimulationManager(ant_definition)
+        sm.set_model_parameters(
+            self.n_init_conditions,
+            self.n_sims_per_init_condition,
+            self.start_time,
+            self.end_time,
+            self.n_steps,
         )
-        wf_manager.init_deep_abstraction()
 
-        # perform data generation
-        wf_manager.generate_simulation_data()
+        init_conditions = sm.get_randomized_initial_conditions(
+            range_percentage=self.variance_range,
+            zero_perturb_prob=self.zero_perturb_prob,
+            zero_perturb_range=ZERO_PERTURB_RANGE,
+        )
 
-        data = {
-            "srn_definition": definition,
-            "training_data": wf_manager.simulation_data,
+        data = sm.simulate(init_conditions, exec_context)
+        data_spec = {
+            "species": sm.get_species_names(),
+            "parameters": sm.get_parameter_names(),
+            "antimony_definition": ant_definition,
             "simulation_configuration": {
                 "n_init_conditions": self.n_init_conditions,
-                "n_sims_per_init_conditions": self.n_sims_per_init_conditions,
+                "n_sims_per_init_condition": self.n_sims_per_init_condition,
+                "start_time": self.start_time,
+                "end_time": self.end_time,
                 "n_steps": self.n_steps,
-                "endtime": self.end_time,
             },
         }
 
-        return SimulationDataPortObject(SimulationDataSpec(dict()), data)
+        return SimulationDataPortObject(SimulationDataSpec(data_spec), data)

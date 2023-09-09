@@ -14,6 +14,7 @@ from utils.port_objects import (
 )
 
 from utils.categories import simulations_category
+from utils.simulation_manager import SimulationManager
 
 te.setDefaultPlottingEngine("matplotlib")
 
@@ -27,44 +28,68 @@ LOGGER = logging.getLogger(__name__)
     category=simulations_category,
 )
 @knext.input_port(
-    name="SRN Definition",
-    description="",
+    name="CRN Definition",
+    description="The CRN model to perform the simulation on.",
     port_type=crn_definition_port_type,
 )
 @knext.output_table(
     name="Simulation traces",
-    description="",
+    description="Table containing the vertically-stacked simulation traces.",
 )
 @knext.output_image(
     name="Simulation traces PNG image",
-    description="",
+    description="Image representing the produced simulation traces.",
 )
-@knext.output_view(name="Simulation traces view", description="")
+@knext.output_view(
+    name="Simulation traces view",
+    description="Interactive view of the produced simulation traces.",
+)
 class StochasticSimulator:
+    """
+    This node allows to simulate the provided CRN model using the Gillespie algorithm.
+
+    The simulation results are returned as a KNIME table, and the trajectories are plotted and shown as
+    a PNG image as well as an interactive view of the node.
+    """
+
     start_time = knext.DoubleParameter(
-        label="Start time", description="", default_value=0.0
+        label="Start time",
+        description="Time from which to start the simulation.",
+        default_value=0.0,
     )
 
     end_time = knext.DoubleParameter(
-        label="End time", description="", default_value=50.0, min_value=0.1
+        label="End time",
+        description="Time at which to stop the simulation.",
+        default_value=50.0,
+        min_value=0.1,
     )
 
     n_steps = knext.IntParameter(
-        label="Steps", description="", default_value=100, min_value=1
+        label="Steps",
+        description="Number of steps to perform during the specified span of time.",
+        default_value=50,
+        min_value=1,
     )
 
     n_simulations = knext.IntParameter(
-        label="Number of simulations", description="", default_value=50, min_value=1
+        label="Number of simulations",
+        description="Number of simulations to perform for the given initial condition.",
+        default_value=50,
+        min_value=1,
     )
 
     random_seed = knext.IntParameter(
-        label="Random seed", description="", default_value=0, is_advanced=True
+        label="Random seed",
+        description="If set to non-zero, it will be used to enable reproducible simulations.",
+        default_value=0,
+        is_advanced=True,
     )
 
     def configure(
         self, config_context: knext.ConfigurationContext, input_spec: CrnDefinitionSpec
     ):
-        species_names = input_spec.spec_data["species"]  # model definition
+        species_names = input_spec.spec_data["species"]
         col_names = ["time"] + species_names
         types = [knext.double()] * len(col_names)
         return (
@@ -77,51 +102,21 @@ class StochasticSimulator:
         exec_context: knext.ExecutionContext,
         input_port_object: CrnDefinitionPortObject,
     ):
-        definition = input_port_object.data
-        r = te.loadAntimonyModel(definition)
-        # r = definition
-        col_names = ["time"] + r.getBoundarySpeciesIds() + r.getFloatingSpeciesIds()
-
-        r.integrator = "gillespie"
-        if self.random_seed != 0:
-            r.integrator.seed = self.random_seed
-
-        selections = ["time"] + r.getBoundarySpeciesIds() + r.getFloatingSpeciesIds()
-        # n_cols = len(r.selections)
-        n_cols = len(col_names)
-        s_sum = np.zeros(shape=[self.n_steps, n_cols])
-        stacked_sum = np.zeros(shape=[self.n_simulations, self.n_steps, n_cols])
-
-        progress = 0
-        progress_step = 100 / self.n_simulations / 100
-
-        for k in range(self.n_simulations):
-            exec_context.set_progress(progress)
-            r.resetToOrigin()
-            s = r.simulate(
-                self.start_time, self.end_time, self.n_steps, selections=selections
-            )
-            s_arr = np.array(s)
-            s_sum += s
-            stacked_sum[k] = s
-            progress += progress_step
-            r.plot(s, alpha=0.5, show=False)
-
-        te.plot(
-            s[:, 0],
-            s_sum[:, 1:] / self.n_simulations,
-            names=[x + " (mean)" for x in selections[1:]],
-            title="Stochastic simulation",
-            xtitle="time",
-            ytitle="concentration",
+        ant_definition = input_port_object.data
+        sm = SimulationManager(ant_definition)
+        sm.set_model_parameters(
+            1,
+            self.n_simulations,
+            self.start_time,
+            self.end_time,
+            self.n_steps,
+            self.random_seed,
         )
-        te.show()
 
-        fig = plt.gcf()
-        png_bytes = io.BytesIO()
-        fig.savefig(png_bytes, format="png")
+        col_names = ["time"] + sm.get_species_names()
+        n_cols = len(col_names)
 
-        # convert the stacked sum into a dataframe
+        stacked_sum, png_bytes = sm.simulate_and_plot(exec_context)
         reshaped_sum = stacked_sum.reshape(self.n_simulations * self.n_steps, n_cols)
         df = pd.DataFrame(reshaped_sum, columns=col_names)
 

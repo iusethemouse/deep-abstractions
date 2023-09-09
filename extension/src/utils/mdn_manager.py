@@ -87,8 +87,7 @@ class MDN(nn.Module):
 
 
 class MdnManager:
-    def __init__(self, model_name, n_species):
-        self.model_name = model_name
+    def __init__(self, n_species):
         self.n_species = n_species
         # self.n_parameters = n_parameters
 
@@ -128,8 +127,15 @@ class MdnManager:
         self.model.eval()
         print(f"Model loaded from {filepath} and moved to {device}")
 
+    def get_model_weights(self):
+        return self.model.state_dict()
+
+    def set_model_weights(self, weights):
+        self.model.load_state_dict(weights)
+
     def train(
         self,
+        exec_context,
         n_epochs=20,
         # loss_criterion=nn.MSELoss(),
         loss_criterion=GaussianNLLLoss(),
@@ -141,7 +147,16 @@ class MdnManager:
         best_loss = float("inf")
         epochs_no_improve = 0
 
+        # progress visualisation
+        progress = 0
+        progress_step = 100 / n_epochs / 100
+
         for epoch in range(n_epochs):
+            if exec_context.is_canceled():
+                print("Execution cancelled.")
+                break
+
+            exec_context.set_progress(progress)
             for i, (inputs, targets) in enumerate(self.train_loader):
                 inputs = inputs.to(device)
                 targets = targets.to(device)
@@ -152,6 +167,8 @@ class MdnManager:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+
+            progress += progress_step
 
             print(f"Epoch [{epoch+1}/{n_epochs}], Loss: {loss.item():.4f}")
 
@@ -181,14 +198,21 @@ class MdnManager:
                 running_loss += loss.item()
 
         average_loss = running_loss / len(self.test_loader)
-        print(
-            f"Validation Loss of the model on test data : {average_loss}"
-        )
-        
+        print(f"Validation Loss of the model on test data : {average_loss}")
 
-    def simulate(self, init_conditions, time_step, n_steps=10, n_sims_per_condition=1):
+    def simulate(
+        self,
+        init_conditions,
+        exec_context,
+        time_step,
+        n_steps=10,
+        n_sims_per_condition=1,
+    ):
         self.model.eval()
         all_trajectories = []
+
+        progress = 0
+        progress_step = 100 / len(init_conditions) / n_sims_per_condition / 100
 
         for i, init_condition in enumerate(init_conditions):
             print(
@@ -196,7 +220,12 @@ class MdnManager:
             )
 
             for sim in range(n_sims_per_condition):
+                if exec_context.is_canceled():
+                    print("Execution cancelled.")
+                    break
+
                 print(f"  Simulating trajectory {sim+1} / {n_sims_per_condition}")
+                exec_context.set_progress(progress)
 
                 trajectory = [init_condition[: self.n_species + 1]]
                 current_state = self.convert_numpy_to_torch(init_condition)
@@ -216,6 +245,8 @@ class MdnManager:
 
                 trajectory = np.array(trajectory)
                 all_trajectories.append(trajectory)
+
+                progress += progress_step
 
         return np.array(all_trajectories)
 
