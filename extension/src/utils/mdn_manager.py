@@ -4,8 +4,23 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 
 import numpy as np
+import platform
 
 device = torch.device("mps")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def auto_select_device():
+    if platform.system() == "Darwin" and platform.processor() == "arm64":
+        # M-series Macs
+        return torch.device("mps")
+    elif torch.cuda.is_available():
+        return torch.device("cuda")
+    else:
+        return torch.device("cpu")
+
+
+device = auto_select_device()
 
 
 class GaussianNLLLoss(nn.Module):
@@ -129,6 +144,15 @@ class MdnManager:
 
     def get_model_weights(self):
         return self.model.state_dict()
+
+    def save_model_to_onnx(self, destination):
+        dummy_input = torch.randn(1, 1, 1 + self.n_species).to(device)
+        torch.onnx.export(self.model, dummy_input, destination, verbose=True)
+        print("Model exported to model.onnx")
+
+    def load_onnx_model(self, filepath):
+        self.model = torch.jit.load(filepath, map_location=device)
+        self.model.to(device)
 
     def set_model_weights(self, weights):
         self.model.load_state_dict(weights)

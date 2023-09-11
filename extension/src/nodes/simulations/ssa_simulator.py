@@ -113,11 +113,20 @@ class StochasticSimulator:
             self.random_seed,
         )
 
+        init_conditions = sm.get_randomized_initial_conditions(
+            zero_perturb_prob=1.0, n_conditions=1
+        )
+        data = sm.simulate(init_conditions, exec_context)
+        png_bytes = sm.plot_simulations(
+            data,
+            1,
+            self.n_simulations,
+            sm.get_column_names(),
+        )
+
         col_names = ["time"] + sm.get_species_names()
         n_cols = len(col_names)
-
-        stacked_sum, png_bytes = sm.simulate_and_plot(exec_context)
-        reshaped_sum = stacked_sum.reshape(self.n_simulations * self.n_steps, n_cols)
+        reshaped_sum = data.reshape(self.n_simulations * (self.n_steps + 1), n_cols)
         df = pd.DataFrame(reshaped_sum, columns=col_names)
 
         return (

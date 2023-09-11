@@ -35,18 +35,20 @@ class CrnWriter:
 
     format_selection = knext.EnumParameter(
         label="Output format",
-        description="",
+        description="Specify which format to use for the output file.",
         default_value=AvailableFormats.SBML.name,
         enum=AvailableFormats,
     )
 
     filename = knext.StringParameter(
-        label="Output filename", description="", default_value=DEFAULT_FILENAME
+        label="Output filename",
+        description="What to name the saved file.",
+        default_value=DEFAULT_FILENAME,
     )
 
     destination = knext.StringParameter(
         label="Output directory",
-        description="",
+        description="Where to place the saved file.",
         default_value=DEFAULT_WRITE_PATH,
     )
 

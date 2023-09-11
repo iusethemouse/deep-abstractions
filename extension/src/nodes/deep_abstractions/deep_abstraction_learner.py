@@ -102,6 +102,7 @@ class DeepAbstractionLearner:
         start_time = sim_config["start_time"]
         end_time = sim_config["end_time"]
         n_steps = sim_config["n_steps"]
+        step_size = end_time / n_steps
 
         sm.set_model_parameters(
             n_init_conditions,
@@ -122,6 +123,15 @@ class DeepAbstractionLearner:
             "model_weights": mm.get_model_weights(),
         }
 
+        # formulate the new sim_config only containing the start_time and step_size
+        sim_config = {
+            "step_size": step_size,
+        }
+        spec_data = input_port_object.spec.spec_data
+        spec_data["simulation_configuration"] = sim_config
+
         return DeepAbstractionModelPortObject(
-            DeepAbstractionModelSpec(input_port_object.spec.spec_data), data
+            # DeepAbstractionModelSpec(input_port_object.spec.spec_data), data
+            DeepAbstractionModelSpec(spec_data),
+            data,
         )

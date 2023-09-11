@@ -151,10 +151,11 @@ class SimulationManager:
         Used to enable rapid exploration of the CRN. Generates trajectories for a single initial condition,
         and provides a plot of the mean trajectories.
         """
-        col_names = ["time"] + self.get_species_names()
+        species_names = self.get_species_names()
+        col_names = ["time"] + species_names
         selections = [
             "time"
-        ] + self.get_species_names()  # currently same as col_names, but should allow selecting specific species
+        ] + species_names  # currently same as col_names, but should allow selecting specific species
 
         n_cols = len(col_names)
         s_sum = np.zeros(shape=[self.n_steps, n_cols])
@@ -162,15 +163,25 @@ class SimulationManager:
             shape=[self.n_sims_per_init_condition, self.n_steps, n_cols]
         )
 
+        init_condition = self.get_randomized_initial_conditions(
+            zero_perturb_prob=1.0, n_conditions=1
+        )
+        print("Initial condition:", init_condition)
+        self.model.reset()
+        self.assign_custom_values_to_model(species_names, init_condition)
+
         progress = 0
         progress_step = 100 / self.n_sims_per_init_condition / 100
 
         for i in range(self.n_sims_per_init_condition):
             exec_context.set_progress(progress)
-            self.model.reset()
+            # self.model.reset()
+            # self.assign_custom_values_to_model(species_names, init_condition)
+
             s = self.model.simulate(
-                self.start_time, self.end_time, self.n_steps, selections=selections
+                self.start_time, self.end_time, self.n_steps + 1, selections=selections
             )
+            print(s)
             s_sum += s
             stacked_sum[i] = s
             progress += progress_step
@@ -226,7 +237,7 @@ class SimulationManager:
 
                 trajectory = self.model.simulate(0.0, self.end_time, self.n_steps + 1)
 
-                # append the randomized reaction rates to the trajectory
+                # append the randomized reaction rates to the trajectory (if initially provided)
                 if randomized_reaction_rates is not None:
                     for param_value in reaction_rates:
                         param_column = np.full((trajectory.shape[0], 1), param_value)
@@ -270,6 +281,12 @@ class SimulationManager:
 
         plt.legend()
         plt.show()
+
+        fig = plt.gcf()
+        png_bytes = io.BytesIO()
+        fig.savefig(png_bytes, format="png")
+
+        return png_bytes
 
     def truncate_columns(self, data, n_cols):
         return data[..., :-n_cols]
