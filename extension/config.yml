@@ -1,4 +1,4 @@
 org.mcss_kn.deep_abstractions:
   src: /Users/ivan/Developer/git/deep-abstractions/extension
-  conda_env_path: /Users/ivan/miniconda3/envs/knime_torch_env
+  conda_env_path: /Users/ivan/miniconda3/envs/deep_abstractions_env
   debug_mode: true

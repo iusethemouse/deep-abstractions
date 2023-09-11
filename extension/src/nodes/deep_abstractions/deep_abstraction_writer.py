@@ -39,7 +39,10 @@ class DeepAbstractionWriter:
     """
 
     class AvailableFormats(knext.EnumParameterOptions):
-        WEIGHTS = ("PyTorch weights", "Save the model weights only.")
+        WEIGHTS = (
+            "PyTorch weights",
+            "Save the PyTorch model weights together with the CRN metadata. Can be read by the Reader node.",
+        )
         ONNX = (
             "ONNX",
             "Save the model in the universal ONNX format.",

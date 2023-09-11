@@ -1,0 +1,13 @@
+name: deep_abstractions_env
+channels:
+  - knime
+  - conda-forge
+dependencies:
+  - knime-extension=5.1.0=py_0
+  - knime-python-base=5.1.0=py310_202307120737
+  - python=3.10.12=h01493a6_0_cpython
+  - pip:
+      - antimony==2.13.2
+      - onnx==1.14.1
+      - tellurium==2.2.8
+      - torch==2.0.1
