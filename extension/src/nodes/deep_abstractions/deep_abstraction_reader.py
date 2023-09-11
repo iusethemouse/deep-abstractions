@@ -14,7 +14,7 @@ from utils.simulation_manager import SimulationManager
 from utils.mdn_manager import MdnManager
 
 LOGGER = logging.getLogger(__name__)
-DEFAULT_PATH = "/Users/ivan/Downloads/tmp/abstract_model"
+DEFAULT_PATH = "/path/to/abstract/model"
 
 
 @knext.node(

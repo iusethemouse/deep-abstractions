@@ -10,7 +10,7 @@ from utils.port_objects import (
 
 from utils.categories import reaction_networks_category
 
-DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/"
+DEFAULT_WRITE_PATH = "/destination/path/"
 DEFAULT_FILENAME = "crn"
 
 

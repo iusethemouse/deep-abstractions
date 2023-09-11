@@ -16,7 +16,7 @@ from utils.mdn_manager import MdnManager
 from utils.simulation_manager import SimulationManager
 
 LOGGER = logging.getLogger(__name__)
-DEFAULT_WRITE_PATH = "/Users/ivan/Downloads/tmp/"
+DEFAULT_WRITE_PATH = "/destination/path/"
 DEFAULT_FILENAME = "abstract_model"
 
 

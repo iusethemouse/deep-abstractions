@@ -6,9 +6,6 @@ from torch.utils.data import DataLoader
 import numpy as np
 import platform
 
-device = torch.device("mps")
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 def auto_select_device():
     if platform.system() == "Darwin" and platform.processor() == "arm64":

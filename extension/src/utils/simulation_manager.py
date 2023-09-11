@@ -1,6 +1,5 @@
 import tellurium as te
 import numpy as np
-import os
 import io
 import random
 import matplotlib.pyplot as plt

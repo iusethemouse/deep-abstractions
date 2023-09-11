@@ -5,12 +5,6 @@ import pandas as pd
 import logging
 
 from utils.port_objects import (
-    crn_definition_port_type,
-    CrnDefinitionSpec,
-    CrnDefinitionPortObject,
-)
-
-from utils.port_objects import (
     deep_abstraction_model_port_type,
     DeepAbstractionModelSpec,
     DeepAbstractionModelPortObject,

@@ -10,9 +10,7 @@ from utils.port_objects import (
 from utils.categories import reaction_networks_category
 from utils.simulation_manager import SimulationManager
 
-DEFAULT_SBML_PATH = (
-    "/Users/ivan/Developer/git/deep-abstractions/crn_models/2_repressilator.txt"
-)
+DEFAULT_SBML_PATH = "/path/to/model/definition.xml"
 
 
 @knext.node(

@@ -1,4 +1,5 @@
+# this config file is only used for development purposes
 org.mcss_kn.deep_abstractions:
-  src: /Users/ivan/Developer/git/deep-abstractions/extension
-  conda_env_path: /Users/ivan/miniconda3/envs/deep_abstractions_env
-  debug_mode: true
+  src: /path/to/your/extension/src
+  conda_env_path: /path/to/your/conda/env
+  debug_mode: true # allows seeing changes in the extension without restarting KNIME, slows down performance

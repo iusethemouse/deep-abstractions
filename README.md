@@ -5,7 +5,7 @@
 
 ---
 
-This work is part of my Master thesis, a partical goal of which is to produce an open-source GUI tool that aims to mitigate usability and approachability problems related to using deep abstraction methods.
+This work is part of my Master thesis, a partial goal of which is to produce an open-source GUI tool that aims to mitigate usability and approachability problems related to using deep abstraction methods.
 
 This repository contains the implementation of a KNIME extension, "Deep Abstractions of CRNs", which uses [Tellurium](https://github.com/sys-bio/tellurium) and [PyTorch](https://github.com/pytorch/pytorch) as the backend, and [KNIME Analytics Platform](https://github.com/knime/knime-core) as the frontend.
 
@@ -32,6 +32,7 @@ Shared between all DA methods developed up to now is a lack of complexity abstra
 ---
 
 ## Available functionality
+![Extension example](https://github.com/iusethemouse/images/blob/main/extension-demo.png)
 As a proof-of-concept, the current v0.1.0 implementation of the "Deep Abstractions of CRNs" extension provides the following functionality:
 - Importing and exporting CRN models in SBML and Antimony formats. This additionally allows to perform direct translations from SBML to Antimony and vice versa.
 - Performing stochastic simulations of CRN models using SSA. This produces trajectories as KNIME tables, as well as provides clear visualisations of the trajectories allowing for quickly exploring the various characteristics of the CRN's dynamics.
@@ -43,3 +44,13 @@ As a proof-of-concept, the current v0.1.0 implementation of the "Deep Abstractio
 ---
 
 ## Documentation
+### Using the extension
+In order to use the current version of the extension:
+1. Download the `bundled_extension.zip` archive, which contains the source code as well as all the required Python dependencies.
+2. Unzip archive.
+3. In KNIME, go to _Preferences_ -> _Install/Update_ -> _Available Software Sites_. Click __Add__ and select the `bundled_extension` directory that was originally in the archive. Follow installation instructions.
+4. Once the software update site has been added, go to _File_ -> _Install KNIME Extensions…_, search for "Deep Abstractions" in the search field, and proceed to install the extension. During the installation process, the necessary Python libraries compatible with your operating system will be downloaded and installed.
+5. Re-launch KNIME, and the nodes of the extension should be available and usable in the Node Repository.
+
+### Contributing to the development
+To contribute to the development of the extension, please follow the steps described in [this](https://docs.knime.com/latest/pure_python_node_extensions_guide/index.html#introduction) extension development guide. Pull requests and forks are most welcome.

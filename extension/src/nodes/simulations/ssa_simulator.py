@@ -2,9 +2,6 @@ import knime.extension as knext
 
 import tellurium as te
 import pandas as pd
-import numpy as np
-import io
-import matplotlib.pyplot as plt
 import logging
 
 from utils.port_objects import (

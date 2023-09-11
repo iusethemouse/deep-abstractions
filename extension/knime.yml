@@ -1,6 +1,5 @@
 name: deep_abstractions
 author: Ivan Prigarin
-# env_yml_path: src/env.yml
 env_yml_path:
   osx-64: src/env.yml
   osx-arm64: src/env_arm.yml
